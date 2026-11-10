@@ -1,0 +1,32 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 16px 16px 64px;
+}
+
+@media (min-width: 768px) {
+  .page {
+    gap: 32px;
+    padding: 24px 24px 80px;
+  }
+}
+
+.content {
+  min-height: 360px;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: opacity var(--transition);
+}
+
+.stale {
+  opacity: 0.55;
+  pointer-events: none;
+}
