@@ -1,0 +1,60 @@
+{
+  "common": {
+    "loading": "Загрузка",
+    "retry": "Повторить"
+  },
+  "header": {
+    "badge": "Powered by TVmaze",
+    "title": "TV Shows Explorer",
+    "subtitle": "Найдите сериал по названию, отфильтруйте по жанру и откройте карточку."
+  },
+  "language": {
+    "groupLabel": "Язык интерфейса"
+  },
+  "search": {
+    "placeholder": "Например, Murder, Friends или Dark",
+    "ariaLabel": "Поиск сериалов",
+    "clear": "Очистить поиск"
+  },
+  "status": {
+    "idleTitle": "Что посмотрим сегодня?",
+    "idleText": "Начните вводить название — результаты появятся сами.",
+    "emptyTitle": "Ничего не найдено",
+    "emptyText": "По запросу «{{query}}» ничего не нашлось. Попробуйте другое название.",
+    "errorTitle": "Что-то пошло не так",
+    "errorText": "Не удалось загрузить сериалы. Проверьте соединение и попробуйте ещё раз.",
+    "rateLimitText": "TVmaze просит немного подождать — слишком много запросов. Попробуйте через пару секунд.",
+    "timeoutText": "TVmaze слишком долго не отвечает. Проверьте соединение и попробуйте ещё раз.",
+    "offlineTitle": "Нет соединения",
+    "offlineText": "Вы офлайн. Поиск продолжится, как только интернет вернётся."
+  },
+  "results": {
+    "found_one": "Найден {{count}} сериал по запросу «{{query}}»",
+    "found_few": "Найдено {{count}} сериала по запросу «{{query}}»",
+    "found_many": "Найдено {{count}} сериалов по запросу «{{query}}»",
+    "found_other": "Найдено {{count}} сериала по запросу «{{query}}»",
+    "filtered_one": "{{filtered}} из {{count}} сериала · {{genres}}",
+    "filtered_few": "{{filtered}} из {{count}} сериалов · {{genres}}",
+    "filtered_many": "{{filtered}} из {{count}} сериалов · {{genres}}",
+    "filtered_other": "{{filtered}} из {{count}} сериала · {{genres}}",
+    "loading": "Загрузка сериалов",
+    "searching": "Ищем «{{query}}»…"
+  },
+  "genres": {
+    "all": "Все жанры",
+    "groupLabel": "Фильтр по жанрам"
+  },
+  "pagination": {
+    "ariaLabel": "Страницы результатов",
+    "prev": "Предыдущая страница",
+    "next": "Следующая страница",
+    "page": "Страница {{page}}"
+  },
+  "show": {
+    "posterAlt": "Постер сериала «{{title}}»",
+    "unknownDate": "Дата неизвестна",
+    "present": "н. в.",
+    "noSummary": "Описание пока не добавлено.",
+    "openOnTvmaze": "Открыть на TVmaze →"
+  }
+}

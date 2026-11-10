@@ -1,0 +1,9 @@
+{
+  "rules": {
+    "media-feature-range-notation": "prefix",
+    "media-feature-name-disallowed-list": [
+      ["max-width", "max-height"],
+      { "message": "Mobile first: base styles target mobile, larger screens use @media (min-width: ...)" }
+    ]
+  }
+}

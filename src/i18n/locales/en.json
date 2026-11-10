@@ -1,0 +1,56 @@
+{
+  "common": {
+    "loading": "Loading",
+    "retry": "Try again"
+  },
+  "header": {
+    "badge": "Powered by TVmaze",
+    "title": "TV Shows Explorer",
+    "subtitle": "Find a show by title, filter by genre and open its card."
+  },
+  "language": {
+    "groupLabel": "Interface language"
+  },
+  "search": {
+    "placeholder": "For example, Murder, Friends or Dark",
+    "ariaLabel": "Search shows",
+    "clear": "Clear search"
+  },
+  "status": {
+    "idleTitle": "What shall we watch today?",
+    "idleText": "Start typing a title and results will appear automatically.",
+    "emptyTitle": "Nothing found",
+    "emptyText": "Nothing matched “{{query}}”. Try another title.",
+    "errorTitle": "Something went wrong",
+    "errorText": "Failed to load shows. Check your connection and try again.",
+    "rateLimitText": "TVmaze asks us to slow down — too many requests. Try again in a couple of seconds.",
+    "timeoutText": "TVmaze is taking too long to respond. Check your connection and try again.",
+    "offlineTitle": "No connection",
+    "offlineText": "You are offline. The search will continue as soon as the internet is back."
+  },
+  "results": {
+    "found_one": "Found {{count}} show for “{{query}}”",
+    "found_other": "Found {{count}} shows for “{{query}}”",
+    "filtered_one": "{{filtered}} of {{count}} show · {{genres}}",
+    "filtered_other": "{{filtered}} of {{count}} shows · {{genres}}",
+    "loading": "Loading shows",
+    "searching": "Searching for “{{query}}”…"
+  },
+  "genres": {
+    "all": "All genres",
+    "groupLabel": "Filter by genre"
+  },
+  "pagination": {
+    "ariaLabel": "Result pages",
+    "prev": "Previous page",
+    "next": "Next page",
+    "page": "Page {{page}}"
+  },
+  "show": {
+    "posterAlt": "Poster of “{{title}}”",
+    "unknownDate": "Date unknown",
+    "present": "present",
+    "noSummary": "No description yet.",
+    "openOnTvmaze": "Open on TVmaze →"
+  }
+}
