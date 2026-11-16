@@ -1,6 +1,6 @@
 # AI Rules — Simple Architecture
 
-> Версия 0.1. Документ пополняется по мере развития архитектуры.
+> Версия 0.2. Документ пополняется по мере развития архитектуры.
 > Правила обязательны для людей и для AI-ассистентов. Правила пишутся на русском, код и названия на английском.
 
 ## Стек
@@ -14,12 +14,20 @@
 
 ## Что такое Simple Architecture
 
-Сейчас описаны слои **View** и **Presenter**.
+Simple Architecture опирается на VIPER: **V**iew, **I**nteractor, **P**resenter, **E**ntity, **R**outer. Interactor у нас называется **Tasks**.
 
-| Слой      | Что это в React                      | Ответственность                                                       |
-| --------- | ------------------------------------ | --------------------------------------------------------------------- |
-| View      | Компонент (JSX)                      | Только то, что пользователь видит в браузере                          |
-| Presenter | Хук `usePresenter` в отдельном файле | 100% логики компонента: получение данных, форматирование, обработчики |
+| Слой VIPER | У нас     | Что это в React                                   | Ответственность                                                           |
+| ---------- | --------- | ------------------------------------------------- | ------------------------------------------------------------------------- |
+| View       | View      | Компонент (JSX)                                   | Только то, что пользователь видит в браузере                              |
+| Presenter  | Presenter | Хук `usePresenter` в `logic/usePresenter.ts`      | Связывает View с логикой: готовит данные к показу, обработчики, навигация |
+| Interactor | **Tasks** | Обычные функции в `logic/tasks/` или `src/tasks/` | Бизнес-логика: контроллеры с доступом к любому стору (use cases)          |
+| Entity     | Entity    | Стор state-менеджера в `src/stores/`              | База данных: только данные, доступ через `get` / `set`                    |
+| Router     | Навигация | Вызовы роутера в presenter                        | Переходы между страницами. Не бизнес-логика, зависит от среды запуска     |
+
+### Бизнес-правила и бизнес-логика
+
+- **Бизнес-правила** описывают, как бизнес работает и зарабатывает. Они существуют и без приложения.
+- **Бизнес-логика** — то, что в книге «Чистая архитектура» называется вариантами использования (use cases): сценарии взаимодействия пользователя с системой. В Simple Architecture вся бизнес-логика живёт в **тасках** (`tasks`).
 
 ---
 
@@ -31,6 +39,8 @@ src/
   App/            ← корневой компонент: шапка приложения + страница (позже — роутер)
   pages/          ← страницы. Каждая страница — компонент по правилам View + Presenter, внутри — дерево её компонентов
   components/     ← общие компоненты приложения (используются в 2+ местах или нужны на всех страницах)
+  tasks/          ← общие (переиспользуемые) таски: бизнес-логика, нужная в 2+ местах
+  stores/         ← сущности (Entity): сторы — «база данных», только get / set
   ui-kit/         ← базовые компоненты: Button, Input, Heading, Text, Badge, Link, Image, Chip, …
   shared/
     hooks/        ← универсальные хуки, не привязанные к предметной области
@@ -45,6 +55,7 @@ src/
 - **Страницы подчиняются правилу View + Presenter** так же, как любой компонент.
 - Зависимости идут сверху вниз: `pages` → `components` → `ui-kit`. `ui-kit` не импортирует ничего из `pages`, `components`, `api` и `i18n`; `components` не импортируют из `pages`.
 - `shared`, `api` и `i18n` могут использоваться любым слоем, кроме `ui-kit`.
+- Таски (`logic/tasks/`, `src/tasks/`) могут использовать `api`, `stores`, `shared` и другие таски. Таски **не зависят** от React, компонентов, ui-kit, i18n и роутера.
 
 ---
 
@@ -54,7 +65,7 @@ View содержит **только две вещи**: вызов `usePresenter
 
 ### Разрешённые импорты во View
 
-- `./usePresenter`
+- `./logic/usePresenter`
 - дочерние компоненты (вложенные или общие)
 - компоненты ui-kit
 - стили `*.module.css`
@@ -79,7 +90,7 @@ View содержит **только две вещи**: вызов `usePresenter
 ```tsx
 // ShowCard/ShowCard.tsx — View
 import type { Props } from './types';
-import { usePresenter } from './usePresenter';
+import { usePresenter } from './logic/usePresenter';
 import { Button } from '@/ui-kit/Button/Button';
 import { ShowPoster } from './ShowPoster/ShowPoster';
 
@@ -102,37 +113,37 @@ export const ShowCard = (props: Props) => {
 
 ## Правило 2. Presenter — это хук `usePresenter`
 
-- Presenter лежит в файле `usePresenter.ts` в папке компонента. Имя одинаковое во всех компонентах.
-- Presenter забирает **100% логики** компонента: хуки React, запросы React Query, форматирование, вычисление классов, обработчики.
+- Presenter лежит в файле `logic/usePresenter.ts` в папке компонента. Имя одинаковое во всех компонентах.
+- Presenter забирает **100% логики отображения** компонента: хуки React, запросы React Query, форматирование, вычисление классов, обработчики, навигацию. **Бизнес-логику** presenter не реализует сам, а вызывает таски (правило 8).
 - Принимает props компонента целиком: `usePresenter(props)`.
 - Возвращает **плоский объект**, в котором всё готово к показу:
   - данные в финальном виде: отформатированные строки, числа, даты;
   - флаги состояния: `isLoading`, `isEmpty`, `isError`, `isOpen`, …;
   - готовые `className`;
   - обработчики с префиксом `handle*`: `handleClick`, `handleSubmit`, …
-- Presenter **не вызывает `useQuery` / `useMutation` напрямую**. Каждый запрос оборачивается в отдельный кастомный хук в своём файле `use<Name>.ts` (например, `useSearchShows.ts`), а presenter только вызывает его. Query key выносится в `constants.ts`.
-- Размещение хука — по правилу 4: используется в одном месте → в папке компонента, в нескольких → `src/shared/hooks/`.
-- Когда появится слой Interactor, эти хуки переедут туда.
-- Самостоятельная логика со своим состоянием (пагинация, debounce и т. п.) тоже выносится в кастомный хук `use<Name>.ts` (например, `usePagination.ts`, `useGenreFilter.ts`). Presenter собирает такие хуки вместе и готовит данные для View.
+- Presenter **не вызывает `useQuery` / `useMutation` напрямую**. Каждый запрос оборачивается в отдельный кастомный хук в своём файле `logic/use<Name>.ts` (например, `logic/useSearchShows.ts`), а presenter только вызывает его. Query key выносится в `constants.ts`.
+- Хуки React Query остаются хуками в `logic/` — в таски они не переезжают, потому что таски не зависят от React. Сама работа с данными (запрос к API и его обработка) — таска, которую хук передаёт в `queryFn`.
+- Самостоятельная логика со своим состоянием (пагинация, debounce и т. п.) тоже выносится в кастомный хук `logic/use<Name>.ts` (например, `usePagination.ts`, `useGenreFilter.ts`). Presenter собирает такие хуки вместе и готовит данные для View.
+- Размещение хука — по правилу 4: используется в одном месте → в `logic/` компонента, в нескольких → `src/shared/hooks/`.
 
 ```ts
-// ShowsExplorer/useSearchShows.ts
+// ShowsExplorer/logic/useSearchShows.ts — хук React Query
 export const useSearchShows = (query: string) =>
   useQuery({
     queryKey: [...SEARCH_SHOWS_QUERY_KEY, query],
-    queryFn: ({ signal }) => searchShows(query, signal),
+    queryFn: ({ signal }) => searchShows(query, signal), // searchShows — таска
     enabled: query.length > 0,
   });
 
-// ShowsExplorer/usePresenter.ts
+// ShowsExplorer/logic/usePresenter.ts
 const { data, isPending, isError } = useSearchShows(searchQuery);
 ```
 
 ```ts
-// ShowCard/usePresenter.ts — Presenter
+// ShowCard/logic/usePresenter.ts — Presenter
 import { useState } from 'react';
-import type { Props } from './types';
-import styles from './ShowCard.module.css';
+import type { Props } from '../types';
+import styles from '../ShowCard.module.css';
 
 export const usePresenter = ({ show, onFavoriteToggle }: Props) => {
   const [isFavorite, setIsFavorite] = useState(show.isFavorite);
@@ -154,25 +165,29 @@ export const usePresenter = ({ show, onFavoriteToggle }: Props) => {
 
 ### Компонент без логики
 
-Если компоненту не нужна логика (чистая вёрстка), `usePresenter.ts` **не создаётся**. Как только появляется хотя бы одна строка логики, создаётся presenter.
+Если компоненту не нужна логика (чистая вёрстка), папка `logic/` и `usePresenter.ts` **не создаются**. Как только появляется хотя бы одна строка логики, создаётся `logic/usePresenter.ts`.
 
 ---
 
 ## Правило 3. Каждый компонент — отдельная папка
 
 ```
-ShowCard/
-  ShowCard.tsx          ← View, точка входа (имя файла = имя папки)
-  usePresenter.ts       ← Presenter (если есть логика)
-  useSearchShows.ts     ← кастомные хуки: запросы, пагинация и т. п. (если есть)
-  types.ts              ← типы компонента (Props и др.)
-  constants.ts          ← константы (если есть)
-  utils.ts              ← чистые функции-хелперы (если есть)
-  ShowCard.module.css   ← стили
+ShowsExplorer/
+  ShowsExplorer.tsx           ← View, точка входа (имя файла = имя папки)
+  ShowsExplorer.module.css    ← стили
+  types.ts                    ← типы компонента (Props и др.)
+  constants.ts                ← константы (если есть)
+  utils.ts                    ← технические хелперы (если есть)
+  logic/                      ← все хуки компонента и его таски (если есть логика)
+    usePresenter.ts           ← Presenter
+    useSearchShows.ts         ← кастомные хуки: запросы, пагинация и т. п.
+    tasks/                    ← таски компонента (если есть бизнес-логика)
+      searchShows.ts          ← одна таска — один файл, имя файла = имя функции
 ```
 
 - Имя папки = имя компонента = имя файла View (PascalCase).
 - Типы компонента (`Props` и др.) лежат в `types.ts`. Их импортируют и View, и Presenter.
+- **Все хуки компонента** (`usePresenter` и кастомные `use*`) лежат в `logic/`. Во View и рядом с ним хуков нет.
 - **Без `index.ts`** и barrel-файлов. Импорт всегда идёт по полному пути до файла: `./ShowPoster/ShowPoster`.
 
 ---
@@ -187,9 +202,10 @@ src/
   components/
     ShowCard/                 ← используется в нескольких местах → верхний уровень
       ShowCard.tsx
-      usePresenter.ts
-      types.ts
       ShowCard.module.css
+      types.ts
+      logic/
+        usePresenter.ts
       ShowPoster/             ← используется только в ShowCard → вложен
         ShowPoster.tsx
         ShowPoster.module.css
@@ -257,25 +273,101 @@ export const usePresenter = ({ show }: Props) => {
 
 В `usePresenter.ts` и View не объявляются константы, типы и функции-хелперы на уровне модуля. Presenter содержит только хук.
 
-| Что                                                        | Куда           |
-| ---------------------------------------------------------- | -------------- |
-| Константы (`PAGE_SIZE`, `SEARCH_DEBOUNCE_MS`, …)           | `constants.ts` |
-| Типы (`Props`, `GenreState`, …)                            | `types.ts`     |
-| Чистые функции-хелперы (`collectGenres`, `formatYears`, …) | `utils.ts`     |
+| Что                                                     | Куда           |
+| ------------------------------------------------------- | -------------- |
+| Константы (`PAGE_SIZE`, `SEARCH_DEBOUNCE_MS`, …)        | `constants.ts` |
+| Типы (`Props`, `GenreState`, …)                         | `types.ts`     |
+| Технические хелперы (`formatYears`, `stripHtml`, …)     | `utils.ts`     |
+| Бизнес-логика (`searchShows`, `filterShowsByGenres`, …) | `logic/tasks/` |
 
 Размещение — по тому же принципу, что и компоненты (правило 4):
 
 - **используется в одном месте** → файл лежит в папке компонента, который его использует;
 - **используется в двух местах и больше** → переезжает на глобальный уровень в папки `src/shared/constants/`, `src/shared/types/`, `src/shared/utils/`. Внутри — файлы по теме: `constants/pagination.ts`, `types/pagination.ts` и т. п. Без `index.ts`.
 
+**Хелпер или таска?** Если функция описывает действие предметной области — что приложение делает для пользователя (найти сериалы, отфильтровать по жанрам, добавить в избранное), это **таска**. Если это техническое преобразование без смысла для бизнеса (вырезать HTML, отформатировать год), это **хелпер** в `utils.ts`.
+
 ```ts
-// ❌ ShowsExplorer/usePresenter.ts
+// ❌ ShowsExplorer/logic/usePresenter.ts
 const PAGE_SIZE = 3;
 type GenreState = { query: string; genre: string | null };
 
 // ✅
 import { PAGE_SIZE } from '@/shared/constants/pagination'; // используется в ShowsExplorer и ShowListSkeleton
-import type { GenreState } from './types';
+import type { GenreState } from '../types';
+```
+
+---
+
+## Правило 8. Tasks — бизнес-логика в обычных функциях
+
+Таска (task) — реализация одного сценария взаимодействия пользователя с системой (use case, в VIPER — Interactor). Принимает входные данные, выполняет инструкции, возвращает результат.
+
+- **Таска — обычная JS/TS-функция.** Одна таска — одна функция. Внутри её можно разбить на шаги, но снаружи это всегда вызов одной функции.
+- **Имя — глагол:** `searchShows`, `filterShowsByGenres`, `addToFavorites`, `login`, `buy`.
+- **Одна таска — один файл**, имя файла = имя функции: `logic/tasks/filterShowsByGenres.ts`. Вспомогательные шаги таски — в том же файле, наружу экспортируется только сама таска.
+- **В тасках нет React.** Ни импортов `react`, ни хуков, ни React Query, ни JSX. Слой на 100% независим от библиотеки отображения.
+- **В тасках нет i18n и навигации.** Тексты и переходы зависят от интерфейса и среды, а не от бизнес-логики (правила 6 и 10).
+- **Таска — контроллер.** Она имеет доступ к любому стору («базе / таблице / коллекции») и работает с ним напрямую через `get` / `set`, без посредников вроде redux-thunk или redux-saga (правило 9). Вся логика изменения данных — в таске, а не в сторе.
+- Таска может вызывать `api`, сторы, `shared` и другие таски. Может быть асинхронной.
+
+### Где лежат таски
+
+- **Используется одним компонентом** → `logic/tasks/` этого компонента.
+- **Используется в двух местах и больше** → глобальная папка `src/tasks/` (по аналогии с правилом 4).
+
+```ts
+// ShowsExplorer/logic/tasks/filterShowsByGenres.ts — таска
+import type { Show } from '@/api/types';
+
+export const filterShowsByGenres = (shows: Show[], genres: string[]) =>
+  genres.length > 0 ? shows.filter((show) => show.genres.some((genre) => genres.includes(genre))) : shows;
+```
+
+```ts
+// ShowsExplorer/logic/useGenreFilter.ts — хук вызывает таску
+const filteredShows = filterShowsByGenres(shows, selectedGenres);
+```
+
+---
+
+## Правило 9. Entity — сторы state-менеджера
+
+Сущность (Entity) — это **стор state-менеджера**. Стор — это **база данных**: он только хранит данные и даёт к ним доступ.
+
+- **В сторе нет методов с логикой** — только `get` и `set`. Никаких `addFavorite`, `toggleGenre`, редьюсеров и вычислений внутри стора.
+- **Вся логика работы с данными — в тасках.** Таска — контроллер: читает данные через `get`, вычисляет новое состояние и записывает через `set`. Одна таска может работать с несколькими сторами («таблицами / коллекциями»).
+- Со сторами общаемся **напрямую**, без библиотек-посредников (redux-thunk, redux-saga и т. п.).
+- Сторы лежат в `src/stores/`, один стор — одна «таблица / коллекция» — один файл: `src/stores/favoritesStore.ts`.
+- Стор хранит **клиентское** состояние (избранное, настройки пользователя, данные, общие для нескольких страниц). **Серверные данные остаются в React Query** и в стор не дублируются.
+- **Presenter** подписывается на стор, чтобы получать данные для отображения, а изменения запускает через таски.
+- Конкретный state-менеджер выбирается, когда появится первая сущность.
+
+```ts
+// src/tasks/addToFavorites.ts — таска-контроллер
+export const addToFavorites = (show: Show) => {
+  const favorites = favoritesStore.get();
+
+  if (favorites.some((item) => item.id === show.id)) return;
+
+  favoritesStore.set([...favorites, show]);
+};
+```
+
+---
+
+## Правило 10. Router — навигация только в presenter
+
+- Переходы между страницами выполняются **в presenter**.
+- Навигация — **не бизнес-логика**. Таска делает своё дело и возвращает результат, а куда перейти после неё, решает presenter.
+- Причина: одна и та же таска (например, `logout`) одинаково работает в вебе и в мобильном приложении, а навигация после неё зависит от среды запуска.
+
+```ts
+// logic/usePresenter.ts
+const handleLogout = async () => {
+  await logout(); // таска: бизнес-логика
+  navigate('/login'); // навигация: решение presenter
+};
 ```
 
 ---
@@ -289,6 +381,7 @@ import type { GenreState } from './types';
 - запрет текста в JSX во View (`react/jsx-no-literals`), кроме символов-иконок;
 - сырые `button`, `input`, `h1`–`h6`, `p`, `span`, `a`, `img` вне `src/ui-kit/` (`react/forbid-elements`, правило 5);
 - импорт `@tanstack/react-query` в `usePresenter.ts` (правило 2);
+- импорт `react`, `react-query`, `i18n` и роутера в тасках (правило 8) — _будет добавлено вместе с переводом кода на папку `logic/`_;
 - в `usePresenter.ts` и View на верхнем уровне модуля объявляется только сам хук или компонент; константы, типы и хелперы — ошибка (правило 7);
 - порядок импортов, исправляется автоматически через `npm run lint:fix`;
 - Prettier для форматирования, максимальная длина строки **120 символов** (`printWidth: 120`).
