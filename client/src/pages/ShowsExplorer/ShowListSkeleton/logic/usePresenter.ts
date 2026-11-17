@@ -1,12 +1,13 @@
 import { useTranslation } from 'react-i18next';
 
-import { PAGE_SIZE } from '@/shared/constants/pagination';
+import { SKELETON_CARDS_COUNT } from '../constants';
 
 export const usePresenter = () => {
   const { t } = useTranslation();
 
   return {
     ariaLabel: t('results.loading'),
-    cards: Array.from({ length: PAGE_SIZE }, (_, index) => ({ id: index })),
+    wakingUpHint: t('results.wakingUp'),
+    cards: Array.from({ length: SKELETON_CARDS_COUNT }, (_, index) => ({ id: index })),
   };
 };

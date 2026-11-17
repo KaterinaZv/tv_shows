@@ -1,18 +1,18 @@
 import { useState } from 'react';
 
-import type { PaginationParams, PaginationState } from '../types/pagination';
+import type { PaginationState } from '../types/pagination';
 
-export const usePagination = <T>({ items, pageSize, resetKey }: PaginationParams<T>) => {
+// Keeps the requested page; any change of resetKey returns it to the first page. Slicing happens on the backend
+export const usePagination = (resetKey: string) => {
   const [state, setState] = useState<PaginationState>({ resetKey, page: 1 });
-  const requestedPage = state.resetKey === resetKey ? state.page : 1;
-  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
-  const currentPage = Math.min(requestedPage, totalPages);
+
+  // Reset the stored page itself (not just hide it), so returning to a previous key does not restore an old page
+  if (state.resetKey !== resetKey) {
+    setState({ resetKey, page: 1 });
+  }
 
   return {
-    pageItems: items.slice((currentPage - 1) * pageSize, currentPage * pageSize),
-    currentPage,
-    totalPages,
-    hasPagination: totalPages > 1,
+    page: state.resetKey === resetKey ? state.page : 1,
     setPage: (page: number) => setState({ resetKey, page }),
   };
 };

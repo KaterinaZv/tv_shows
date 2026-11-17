@@ -1,9 +1,7 @@
-import type { Show } from '@/api/types';
-
-export type GenreFilterParams = {
-  shows: Show[];
-  // Any change of the key resets the filter to all genres
-  resetKey: string;
+export type ShowsPageParams = {
+  query: string;
+  genres: string[];
+  page: number;
 };
 
 export type GenreState = {
