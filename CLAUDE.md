@@ -2,18 +2,34 @@
 
 ## Команды
 
-| Команда             | Что делает                                                                                           |
-| ------------------- | ---------------------------------------------------------------------------------------------------- |
-| `npm run dev`       | Dev-сервер Vite                                                                                      |
-| `npm run check`     | Полная проверка: типы (`tsc --noEmit`) + ESLint + Stylelint + Prettier (`--check`, длина строки 120) |
-| `npm run typecheck` | Проверка типов: `tsc -b --noEmit`                                                                    |
-| `npm run lint`      | ESLint: правила архитектуры, порядок импортов                                                        |
-| `npm run lint:css`  | Stylelint: CSS-модули, mobile first                                                                  |
-| `npm run lint:fix`  | ESLint с автоисправлением (в том числе сортирует импорты)                                            |
-| `npm run format`    | Prettier: форматирует все файлы (`printWidth: 120`)                                                  |
-| `npm run build`     | Сборка: `tsc -b && vite build`                                                                       |
+Все команды запускаются **из корня** монорепозитория.
+
+| Команда                 | Что делает                                                                             |
+| ----------------------- | -------------------------------------------------------------------------------------- |
+| `npm run dev`           | Клиент (Vite, :5173) и сервер (tsx watch, :3000) вместе. `/api` проксируется на сервер |
+| `npm run dev -w client` | Только клиент                                                                          |
+| `npm run dev -w server` | Только сервер                                                                          |
+| `npm run check`         | Полная проверка: типы всех пакетов + ESLint + Stylelint + Prettier (`--check`)         |
+| `npm run typecheck`     | Проверка типов во всех пакетах (`client`, `server`, `shared`)                          |
+| `npm run lint`          | ESLint: правила архитектуры, порядок импортов                                          |
+| `npm run lint:css`      | Stylelint: CSS-модули клиента, mobile first                                            |
+| `npm run lint:fix`      | ESLint с автоисправлением (в том числе сортирует импорты)                              |
+| `npm run format`        | Prettier: форматирует все файлы (`printWidth: 120`)                                    |
+| `npm run build`         | Сборка клиента (`client/dist`) и сервера (`server/dist/index.js`, esbuild)             |
 
 - Задача считается готовой, только если `npm run check` и `npm run build` проходят без ошибок.
+- Зависимость пакета ставится в его workspace: `npm install <pkg> -w client` / `-w server`. Общие инструменты (линтеры, Prettier, husky) — в корне.
+- **После изменения зависимостей `package-lock.json` пересобирается в Linux-контейнере** (`docker run --platform linux/amd64 node:22 npm install`), иначе `npm ci` в GitHub Actions и на Render может упасть.
+
+## Деплой
+
+| Что    | Куда         | Когда                                                                               |
+| ------ | ------------ | ----------------------------------------------------------------------------------- |
+| Клиент | GitHub Pages | Push в `main` → GitHub Actions (`.github/workflows/deploy.yml`)                     |
+| Сервер | Render       | Push в `main` с изменениями в `server/`, `shared/` или зависимостях (`render.yaml`) |
+
+- URL бэкенда для сборки клиента — переменная репозитория `VITE_API_URL` (Settings → Secrets and variables → Actions → Variables).
+- Бесплатный Render засыпает через 15 минут без запросов: первый запрос после этого ждёт до минуты, данные в памяти (кеш, избранное) стираются.
 
 ## Код-стайл
 

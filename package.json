@@ -1,19 +1,23 @@
 {
   "name": "tv-shows-explorer",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
+  "workspaces": [
+    "client",
+    "server",
+    "shared"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "typecheck": "tsc -b --noEmit",
-    "preview": "vite preview",
-    "check": "npm run typecheck && eslint . && stylelint \"src/**/*.css\" && prettier --check .",
+    "dev": "concurrently -k -n client,server -c cyan,magenta \"npm run dev -w client\" \"npm run dev -w server\"",
+    "build": "npm run build -w client && npm run build -w server",
+    "typecheck": "npm run typecheck --workspaces",
+    "check": "npm run typecheck && eslint . && stylelint \"client/src/**/*.css\" && prettier --check .",
     "lint": "eslint .",
+    "lint:css": "stylelint \"client/src/**/*.css\"",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "prepare": "husky",
-    "lint:css": "stylelint \"src/**/*.css\""
+    "prepare": "husky"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -26,20 +30,9 @@
     ],
     "*.{json,md,html,yml}": "prettier --write"
   },
-  "dependencies": {
-    "@tanstack/react-query": "^5.107.1",
-    "i18next": "^27.1.1",
-    "i18next-browser-languagedetector": "^8.3.0",
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1",
-    "react-i18next": "^18.0.1"
-  },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
-    "@types/node": "^26.6.6",
-    "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^6.3.0",
+    "concurrently": "^10.0.7",
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
@@ -52,8 +45,7 @@
     "prettier": "^3.9.10",
     "stylelint": "^17.16.0",
     "typescript": "~6.0",
-    "typescript-eslint": "^8.72.2",
-    "vite": "^8.3.7"
+    "typescript-eslint": "^8.72.2"
   },
   "engines": {
     "node": ">=20.19"
