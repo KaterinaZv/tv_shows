@@ -53,5 +53,18 @@
     "present": "present",
     "noSummary": "No description yet.",
     "openOnTvmaze": "Open on TVmaze →"
+  },
+  "favorites": {
+    "button": "Favorites",
+    "buttonAria": "Favorites: {{count}}",
+    "title": "Favorites",
+    "close": "Close favorites",
+    "empty": "No favorites yet. Tap the star on a show to save it here.",
+    "loadError": "Failed to load favorites. Try again later.",
+    "add": "Add “{{title}}” to favorites",
+    "remove": "Remove “{{title}}” from favorites",
+    "added": "“{{title}}” added to favorites",
+    "removed": "“{{title}}” removed from favorites",
+    "error": "Failed to update favorites. Try again."
   }
 }

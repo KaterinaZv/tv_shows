@@ -1,5 +1,5 @@
-// Show as the API returns it: TVmaze data flattened to what the client needs
-export type Show = {
+// Show data from TVmaze, flattened to what the client needs
+export type ShowData = {
   id: number;
   url: string;
   name: string;
@@ -13,6 +13,11 @@ export type Show = {
   imageUrl: string | null;
   // Plain text without HTML tags
   summary: string | null;
+};
+
+// Show as the API returns it: data plus the state for the current client
+export type Show = ShowData & {
+  isFavorite: boolean;
 };
 
 // GET /api/shows?q=murder&genres=Comedy,Drama&page=2

@@ -1,5 +1,3 @@
 import type { Show } from '@tv-shows/shared/shows';
 
-export type Props = {
-  show: Show;
-};
+export const NO_FAVORITES: Show[] = [];

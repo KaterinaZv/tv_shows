@@ -8,3 +8,11 @@ export class HttpRequestError extends Error {
     this.status = status;
   }
 }
+
+// Thrown by tasks when the requested entity does not exist; routes turn it into 404
+export class NotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'NotFoundError';
+  }
+}
