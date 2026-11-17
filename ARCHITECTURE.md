@@ -1,6 +1,6 @@
 # AI Rules — Simple Architecture
 
-> Версия 0.3. Документ пополняется по мере развития архитектуры.
+> Версия 0.4. Документ пополняется по мере развития архитектуры.
 > Правила обязательны для людей и для AI-ассистентов. Правила пишутся на русском, код и названия на английском.
 
 ## Стек
@@ -47,15 +47,15 @@ src/
   App/            ← корневой компонент: шапка приложения + страница (позже — роутер)
   pages/          ← страницы. Каждая страница — компонент по правилам View + Presenter, внутри — дерево её компонентов
   components/     ← общие компоненты приложения (используются в 2+ местах или нужны на всех страницах)
-  tasks/          ← общие (переиспользуемые) таски: бизнес-логика, нужная в 2+ местах
-  stores/         ← сущности (Entity): сторы — «база данных», только get / set
-  ui-kit/         ← базовые компоненты: Button, Input, Heading, Text, Badge, Link, Image, Chip, …
+  tasks/          ← общие таски (нужны в 2+ местах) и таски уровня приложения (showToast, dismissToast)
+  stores/         ← сущности (Entity): createStore + сторы — «база данных», только get / set (toastsStore)
+  ui-kit/         ← базовые компоненты: Button, Input, SearchInput, Heading, Text, Badge, Link, Image, Chip, Spinner, Drawer, Toast
   shared/
     hooks/        ← универсальные хуки, не привязанные к предметной области
     constants/    ← общие константы, файлы по темам
     types/        ← общие типы, файлы по темам
     utils/        ← общие утилиты, файлы по темам
-  api/            ← DAL: только HTTP-обвязка над fetch (httpClient), ошибки, queryClient. Без эндпоинтов (правило 12)
+  api/            ← DAL: только HTTP-обвязка над fetch (httpClient), clientId, ошибки, queryClient. Без эндпоинтов (правило 12)
   i18n/           ← настройка i18next и переводы (locales/*.json)
   styles/         ← глобальные стили и CSS-переменные (токены)
 ```
@@ -243,8 +243,10 @@ src/
 | `span` (плашка)     | `Badge` (`variant`)      |
 | `a`                 | `Link` (`isExternal`)    |
 | `img`               | `Image` (`isLazy`)       |
+| `dialog`            | `Drawer`                 |
 
-- Сырые `button`, `input`, `h1`–`h6`, `p`, `span`, `a`, `img` разрешены только внутри `src/ui-kit/`.
+- Сырые `button`, `input`, `h1`–`h6`, `p`, `span`, `a`, `img`, `dialog` разрешены только внутри `src/ui-kit/`.
+- Составные компоненты ui-kit (`SearchInput`, `Drawer`, `Toast`) собираются из базовых компонентов ui-kit и тоже не знают про i18n: тексты (`closeLabel`, `clearLabel`, …) приходят через props.
 - Компоненты ui-kit принимают необязательный `className` — для раскладки и точечных стилей конкретного места (позиционирование, отступы, line-clamp).
 - Не хватает варианта или элемента — добавляем его в ui-kit, а не верстаем сырым тегом.
 
@@ -449,12 +451,13 @@ server/src/
       tasks/            ← бизнес-логика модуля, одна таска — один файл
       types.ts, constants.ts, utils.ts
     favorites/
-      ...
-  tasks/                ← общие таски (используются в 2+ модулях)
-  stores/               ← сторы в памяти: «база данных», только get / set (правило 9)
-  dal/                  ← httpClient для внешних API (правило 12)
-  middleware/           ← общие middleware: CORS, clientId, обработка ошибок
-  shared/               ← общие constants / types / utils
+      routes.ts         ← GET / POST / DELETE /api/favorites
+      tasks/            ← getFavorites, addToFavorites, removeFromFavorites
+  tasks/                ← общие таски (используются в 2+ модулях): fetchTvmaze (кеш), mapTvmazeShow, markFavorites
+  stores/               ← сторы в памяти, только get / set (правило 9): tvmazeCacheStore, favoritesStore
+  dal/                  ← createHttpClient (обвязка над fetch) + tvmaze (клиент с базовым URL TVmaze) (правило 12)
+  middleware/           ← общие middleware: cors, requireClientId, errorHandler (доменные ошибки → HTTP)
+  shared/               ← общие constants / env / errors / types / utils
 ```
 
 | Слой              | На фронте                    | На бэкенде                        |
@@ -487,14 +490,17 @@ server/src/
 - для View-файлов: импорт только `./logic/usePresenter`, компонентов, ui-kit, стилей и типов; запрет хуков React;
 - запрет инлайн-стрелок в JSX-обработчиках (`react/jsx-no-bind`);
 - запрет текста в JSX во View (`react/jsx-no-literals`), кроме символов-иконок;
-- сырые `button`, `input`, `h1`–`h6`, `p`, `span`, `a`, `img` вне `src/ui-kit/` (`react/forbid-elements`, правило 5);
+- сырые `button`, `input`, `h1`–`h6`, `p`, `span`, `a`, `img`, `dialog` вне `src/ui-kit/` (`react/forbid-elements`, правило 5);
 - импорт `@tanstack/react-query` в `usePresenter.ts` (правило 2);
 - в тасках: импорт `react`, React Query, i18n, роутера, ui-kit и компонентов, вызовы хуков и JSX (правило 8);
 - хуки (`use*.ts`) вне папки `logic/` компонента или `src/shared/hooks/` (правила 3 и 4);
 - в `usePresenter.ts` и View на верхнем уровне модуля объявляется только сам хук или компонент; константы, типы и хелперы — ошибка (правило 7);
+- в тасках бэкенда: импорт `express`, `cors`, роутов и middleware (правило 13);
+- `any` — явный, через приведение и пришедший из библиотек (`no-explicit-any`, `no-unsafe-*`);
 - порядок импортов, исправляется автоматически через `npm run lint:fix`;
+- Stylelint: mobile first — `max-width` в медиазапросах запрещён;
 - Prettier для форматирования, максимальная длина строки **120 символов** (`printWidth: 120`).
 
 Все проверки запускаются одной командой: `npm run check`.
 
-Конфигурация — `eslint.config.js`.
+Конфигурация — `eslint.config.js` и `.stylelintrc.json`.

@@ -221,6 +221,7 @@ export default defineConfig([
             { element: 'span', message: 'Используйте Text или Badge из ui-kit.' },
             { element: 'a', message: 'Используйте Link из ui-kit.' },
             { element: 'img', message: 'Используйте Image из ui-kit.' },
+            { element: 'dialog', message: 'Используйте Drawer из ui-kit.' },
           ],
         },
       ],
