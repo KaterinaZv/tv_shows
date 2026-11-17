@@ -12,6 +12,24 @@
   background: var(--color-surface-raised);
   box-shadow: var(--shadow-card);
   animation: slide-in 200ms ease;
+  /* The viewport ignores clicks so the page stays usable; the toast itself is clickable */
+  pointer-events: auto;
+}
+
+.icon {
+  color: var(--color-rating);
+}
+
+.message {
+  flex: 1;
+}
+
+.close {
+  flex-shrink: 0;
+  min-width: 32px;
+  height: 32px;
+  margin: -6px -8px -6px 0;
+  padding: 0;
 }
 
 .success {
