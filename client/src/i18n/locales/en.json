@@ -66,5 +66,8 @@
     "added": "“{{title}}” added to favorites",
     "removed": "“{{title}}” removed from favorites",
     "error": "Failed to update favorites. Try again."
+  },
+  "toast": {
+    "close": "Close notification"
   }
 }

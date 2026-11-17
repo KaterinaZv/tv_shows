@@ -1,8 +1,8 @@
 import type { FavoriteChangeResponse, FavoritesResponse } from '@tv-shows/shared/favorites';
 import type { Show } from '@tv-shows/shared/shows';
 
-// Adds the show to the top of the cached favorites list or removes it; the count comes from the server
-export const applyFavoriteToFavorites = (
+// A new favorite goes to the top (same order as the server's list), a removed one disappears; the count is the server's
+export const updateFavoritesList = (
   favorites: FavoritesResponse,
   { showId, isFavorite, count }: FavoriteChangeResponse,
   show: Show,

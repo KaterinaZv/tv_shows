@@ -4,9 +4,9 @@ import type { ShowsPageResponse } from '@tv-shows/shared/shows';
 
 import { FAVORITES_QUERY_KEY, SHOWS_QUERY_KEY } from '@/shared/constants/queryKeys';
 
-import { applyFavoriteToFavorites } from './tasks/applyFavoriteToFavorites';
-import { applyFavoriteToShowsPage } from './tasks/applyFavoriteToShowsPage';
 import { toggleFavorite } from './tasks/toggleFavorite';
+import { updateFavoritesList } from './tasks/updateFavoritesList';
+import { updateShowsPageFavorite } from './tasks/updateShowsPageFavorite';
 
 export const useToggleFavorite = () => {
   const queryClient = useQueryClient();
@@ -17,11 +17,11 @@ export const useToggleFavorite = () => {
     onSuccess: (change, { show }) => {
       queryClient.setQueriesData<ShowsPageResponse>(
         { queryKey: SHOWS_QUERY_KEY },
-        (page) => page && applyFavoriteToShowsPage(page, change),
+        (page) => page && updateShowsPageFavorite(page, change),
       );
       queryClient.setQueryData<FavoritesResponse>(
         FAVORITES_QUERY_KEY,
-        (favorites) => favorites && applyFavoriteToFavorites(favorites, change, show),
+        (favorites) => favorites && updateFavoritesList(favorites, change, show),
       );
     },
   });
