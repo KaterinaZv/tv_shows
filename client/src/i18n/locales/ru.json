@@ -38,7 +38,8 @@
     "filtered_many": "{{filtered}} из {{count}} сериалов · {{genres}}",
     "filtered_other": "{{filtered}} из {{count}} сериала · {{genres}}",
     "loading": "Загрузка сериалов",
-    "searching": "Ищем «{{query}}»…"
+    "searching": "Ищем «{{query}}»…",
+    "wakingUp": "Сервер просыпается — первый поиск может занять до минуты."
   },
   "genres": {
     "all": "Все жанры",

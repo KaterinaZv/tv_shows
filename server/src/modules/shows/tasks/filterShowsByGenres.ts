@@ -1,4 +1,4 @@
-import type { Show } from '@/api/types';
+import type { Show } from '@tv-shows/shared/shows';
 
 const hasAnyGenre = (show: Show, genres: string[]) => show.genres.some((genre) => genres.includes(genre));
 

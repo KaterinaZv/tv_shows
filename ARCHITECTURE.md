@@ -129,22 +129,22 @@ export const ShowCard = (props: Props) => {
   - флаги состояния: `isLoading`, `isEmpty`, `isError`, `isOpen`, …;
   - готовые `className`;
   - обработчики с префиксом `handle*`: `handleClick`, `handleSubmit`, …
-- Presenter **не вызывает `useQuery` / `useMutation` напрямую**. Каждый запрос оборачивается в отдельный кастомный хук в своём файле `logic/use<Name>.ts` (например, `logic/useSearchShows.ts`), а presenter только вызывает его. Query key выносится в `constants.ts`.
+- Presenter **не вызывает `useQuery` / `useMutation` напрямую**. Каждый запрос оборачивается в отдельный кастомный хук в своём файле `logic/use<Name>.ts` (например, `logic/useShowsPage.ts`), а presenter только вызывает его. Query key выносится в `constants.ts`.
 - Хуки React Query остаются хуками в `logic/` — в таски они не переезжают, потому что таски не зависят от React. Сама работа с данными (запрос к API и его обработка) — таска, которую хук передаёт в `queryFn`.
 - Самостоятельная логика со своим состоянием (пагинация, debounce и т. п.) тоже выносится в кастомный хук `logic/use<Name>.ts` (например, `usePagination.ts`, `useGenreFilter.ts`). Presenter собирает такие хуки вместе и готовит данные для View.
 - Размещение хука — по правилу 4: используется в одном месте → в `logic/` компонента, в нескольких → `src/shared/hooks/`.
 
 ```ts
-// ShowsExplorer/logic/useSearchShows.ts — хук React Query
-export const useSearchShows = (query: string) =>
+// ShowsExplorer/logic/useShowsPage.ts — хук React Query
+export const useShowsPage = ({ query, genres, page }: ShowsPageParams) =>
   useQuery({
-    queryKey: [...SEARCH_SHOWS_QUERY_KEY, query],
-    queryFn: ({ signal }) => searchShows(query, signal), // searchShows — таска
+    queryKey: [...SHOWS_PAGE_QUERY_KEY, query, genres, page],
+    queryFn: ({ signal }) => fetchShowsPage({ query, genres, page }, signal), // fetchShowsPage — таска
     enabled: query.length > 0,
   });
 
 // ShowsExplorer/logic/usePresenter.ts
-const { data, isPending, isError } = useSearchShows(searchQuery);
+const { data, isPending, isError } = useShowsPage({ query: searchQuery, genres: selectedGenres, page });
 ```
 
 ```ts
@@ -188,9 +188,9 @@ ShowsExplorer/
   utils.ts                    ← технические хелперы (если есть)
   logic/                      ← все хуки компонента и его таски (если есть логика)
     usePresenter.ts           ← Presenter
-    useSearchShows.ts         ← кастомные хуки: запросы, пагинация и т. п.
+    useShowsPage.ts           ← кастомные хуки: запросы, пагинация и т. п.
     tasks/                    ← таски компонента (если есть бизнес-логика)
-      searchShows.ts          ← одна таска — один файл, имя файла = имя функции
+      fetchShowsPage.ts       ← одна таска — один файл, имя файла = имя функции
 ```
 
 - Имя папки = имя компонента = имя файла View (PascalCase).
@@ -223,7 +223,7 @@ src/
 
 **Исключение — компоненты уровня приложения.** Компоненты, которые заведомо нужны на всех страницах (`AppHeader`, `LanguageSwitcher`, общая навигация), сразу кладутся в `src/components/`, даже если пока используются в одном месте. Шапка приложения рендерится в корневом `src/App/App.tsx`, а не внутри страницы.
 
-**Исключение — универсальные хуки.** Хуки, не привязанные к предметной области (`useDebouncedValue`, `usePagination`, `useSearchQuery` и т. п.), сразу кладутся в `src/shared/hooks/` (один хук — один файл), даже если пока используются в одном месте. Их типы — в `src/shared/types/`. Хуки предметной области (`useSearchShows`) подчиняются общему правилу.
+**Исключение — универсальные хуки.** Хуки, не привязанные к предметной области (`useDebouncedValue`, `usePagination`, `useSearchQuery` и т. п.), сразу кладутся в `src/shared/hooks/` (один хук — один файл), даже если пока используются в одном месте. Их типы — в `src/shared/types/`. Хуки предметной области (`useShowsPage`) подчиняются общему правилу.
 
 ---
 
@@ -281,12 +281,12 @@ export const usePresenter = ({ show }: Props) => {
 
 В `usePresenter.ts` и View не объявляются константы, типы и функции-хелперы на уровне модуля. Presenter содержит только хук.
 
-| Что                                                     | Куда           |
-| ------------------------------------------------------- | -------------- |
-| Константы (`PAGE_SIZE`, `SEARCH_DEBOUNCE_MS`, …)        | `constants.ts` |
-| Типы (`Props`, `GenreState`, …)                         | `types.ts`     |
-| Технические хелперы (`formatYears`, `stripHtml`, …)     | `utils.ts`     |
-| Бизнес-логика (`searchShows`, `filterShowsByGenres`, …) | `logic/tasks/` |
+| Что                                                 | Куда           |
+| --------------------------------------------------- | -------------- |
+| Константы (`PAGE_SIZE`, `SEARCH_DEBOUNCE_MS`, …)    | `constants.ts` |
+| Типы (`Props`, `GenreState`, …)                     | `types.ts`     |
+| Технические хелперы (`formatYears`, `stripHtml`, …) | `utils.ts`     |
+| Бизнес-логика (`fetchShowsPage`, `toggleGenre`, …)  | `logic/tasks/` |
 
 Размещение — по тому же принципу, что и компоненты (правило 4):
 
@@ -325,16 +325,18 @@ import type { GenreState } from '../types';
 - **Используется в двух местах и больше** → глобальная папка `src/tasks/` (по аналогии с правилом 4).
 
 ```ts
-// ShowsExplorer/logic/tasks/filterShowsByGenres.ts — таска
-import type { Show } from '@/api/types';
+// server/src/modules/shows/tasks/filterShowsByGenres.ts — таска бэкенда
+import type { Show } from '@tv-shows/shared/shows';
 
 export const filterShowsByGenres = (shows: Show[], genres: string[]) =>
   genres.length > 0 ? shows.filter((show) => show.genres.some((genre) => genres.includes(genre))) : shows;
 ```
 
 ```ts
-// ShowsExplorer/logic/useGenreFilter.ts — хук вызывает таску
-const filteredShows = filterShowsByGenres(shows, selectedGenres);
+// server/src/modules/shows/tasks/getShowsPage.ts — таска собирает сценарий из других тасок
+const shows = await searchShows(query);
+const filteredShows = filterShowsByGenres(shows, genres);
+const pageData = paginate(filteredShows, page, PAGE_SIZE);
 ```
 
 ---
@@ -407,17 +409,24 @@ Data access layer (DAL) — тонкая обёртка над `fetch`: мето
 - **В DAL нет эндпоинтов и знаний о ресурсах.** Никаких `showsApi.getAll()`, `favoritesApi.add()`.
 - **Адрес эндпоинта, подготовка параметров и маппинг DTO в сущность — в таске**, которая этот эндпоинт использует.
 - Presenter и хуки **не вызывают DAL напрямую** — только через таски. Таска «в одну строку» — не оверкилл: в ней и живут эндпоинт, параметры и маппинг.
-- Правило одинаково для обеих сторон: на фронте DAL — `client/src/api/httpClient.ts` (ходит в наш бэкенд), на бэкенде — `server/src/dal/httpClient.ts` (ходит в TVmaze).
+- Правило одинаково для обеих сторон: на фронте DAL — `client/src/api/httpClient.ts` (ходит в наш бэкенд), на бэкенде — `server/src/dal/createHttpClient.ts` + `dal/tvmaze.ts` (ходит в TVmaze).
 
 **Почему так:** удалили страницу или модуль — вместе с ними удалились их таски, а значит, эндпоинты и маппинг. В общей обёртке не остаётся мёртвых методов. Это Single Responsibility: вместе группируется то, что меняется по одной причине.
 
 ```ts
 // client/src/pages/ShowsExplorer/logic/tasks/fetchShowsPage.ts — таска
-export const fetchShowsPage = async (params: ShowsPageParams, signal?: AbortSignal) => {
-  const response = await httpClient.get<ShowsPageResponse>('/api/shows', { params, signal });
+export const fetchShowsPage = ({ query, genres, page }: ShowsPageParams, signal?: AbortSignal) => {
+  const params: ShowsPageQuery = { q: query, genres: genres.join(','), page };
 
-  return { ...response, items: response.items.map(toShowCardData) };
+  return httpClient.get<ShowsPageResponse>('/api/shows', { params, signal });
 };
+```
+
+```ts
+// server/src/modules/shows/tasks/searchShows.ts — таска бэкенда: эндпоинт TVmaze и маппинг DTO здесь, а не в DAL
+const results = await tvmaze.get<TvmazeSearchResult[]>('/search/shows', { params: { q: query } });
+
+return results.map((result) => toShow(result.show));
 ```
 
 ---

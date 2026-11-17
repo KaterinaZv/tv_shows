@@ -1,3 +1,21 @@
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Shown only if loading lasts longer than a few seconds: a sleeping free backend needs time to wake up */
+.hint {
+  opacity: 0;
+  animation: appear 300ms ease 4s forwards;
+}
+
+@keyframes appear {
+  to {
+    opacity: 1;
+  }
+}
+
 .list {
   display: grid;
   gap: 16px;

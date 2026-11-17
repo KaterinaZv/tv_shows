@@ -34,7 +34,8 @@
     "filtered_one": "{{filtered}} of {{count}} show · {{genres}}",
     "filtered_other": "{{filtered}} of {{count}} shows · {{genres}}",
     "loading": "Loading shows",
-    "searching": "Searching for “{{query}}”…"
+    "searching": "Searching for “{{query}}”…",
+    "wakingUp": "The server is waking up — the first search can take up to a minute."
   },
   "genres": {
     "all": "All genres",
