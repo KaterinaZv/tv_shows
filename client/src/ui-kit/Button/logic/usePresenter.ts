@@ -8,11 +8,13 @@ export const usePresenter = ({
   isDisabled = false,
   ariaLabel,
   ariaCurrent,
+  isPressed,
   className,
 }: Props) => ({
   children,
   ariaLabel,
   ariaCurrent,
+  isPressed,
   isDisabled,
   className: [styles.button, styles[variant], className].filter(Boolean).join(' '),
   handleClick: onClick,

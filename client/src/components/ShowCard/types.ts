@@ -1,0 +1,9 @@
+import type { Show } from '@tv-shows/shared/shows';
+
+export type Props = {
+  show: Show;
+};
+
+export type ToggleFavoriteParams = {
+  show: Show;
+};

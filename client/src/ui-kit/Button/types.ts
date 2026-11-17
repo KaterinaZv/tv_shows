@@ -9,5 +9,7 @@ export type Props = {
   isDisabled?: boolean;
   ariaLabel?: string;
   ariaCurrent?: 'page';
+  // Toggle buttons (e.g. a favorite star) expose their state to screen readers
+  isPressed?: boolean;
   className?: string;
 };

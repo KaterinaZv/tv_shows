@@ -1,4 +1,5 @@
-import { ShowCard } from './ShowCard/ShowCard';
+import { ShowCard } from '@/components/ShowCard/ShowCard';
+
 import styles from './ShowList.module.css';
 import type { Props } from './types';
 

@@ -1,0 +1,26 @@
+.star {
+  color: var(--color-rating);
+}
+
+/* Mobile first: only the star and the counter fit next to the language switcher */
+.label {
+  display: none;
+}
+
+.list {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+}
+
+@media (min-width: 768px) {
+  .label {
+    display: inline;
+  }
+}

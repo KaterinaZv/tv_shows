@@ -1,7 +1,7 @@
 import type { ApiErrorResponse } from '@tv-shows/shared/shows';
 import type { ErrorRequestHandler } from 'express';
 
-import { HttpRequestError } from '../shared/errors';
+import { HttpRequestError, NotFoundError } from '../shared/errors';
 
 // Translates errors from tasks into HTTP responses; unexpected errors become 500 without leaking internals
 export const errorHandler: ErrorRequestHandler = (error: unknown, _request, response, _next) => {
@@ -10,6 +10,8 @@ export const errorHandler: ErrorRequestHandler = (error: unknown, _request, resp
 
     response.status(status).json(body);
   };
+
+  if (error instanceof NotFoundError) return send(404, error.message);
 
   if (error instanceof HttpRequestError) {
     // TVmaze asked to slow down: pass 429 through so the client can show a specific message

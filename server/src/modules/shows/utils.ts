@@ -1,16 +1,10 @@
 import { MAX_GENRES, MAX_QUERY_LENGTH } from './constants';
 import type { ShowsPageParams } from './types';
 
-export const stripHtml = (html: string | null) =>
-  html
-    ? html
-        .replace(/<[^>]*>/g, '')
-        .replace(/\s+/g, ' ')
-        .trim()
-    : null;
+type ParsedShowsPageQuery = Omit<ShowsPageParams, 'clientId'>;
 
 // Validates ?q=&genres=&page= and returns null when the request is malformed
-export const parseShowsPageQuery = ({ q, genres, page }: Record<string, unknown>): ShowsPageParams | null => {
+export const parseShowsPageQuery = ({ q, genres, page }: Record<string, unknown>): ParsedShowsPageQuery | null => {
   const query = typeof q === 'string' ? q.trim() : '';
   const genreList =
     typeof genres === 'string' && genres.length > 0
