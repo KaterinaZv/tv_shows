@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
-import { ALL_GENRES_VALUE } from './constants';
-import type { Props } from './types';
+import { ALL_GENRES_VALUE } from '../constants';
+import type { Props } from '../types';
 
 export const usePresenter = ({ genres, selectedGenres, onGenreToggle, onReset }: Props) => {
   const { t } = useTranslation();

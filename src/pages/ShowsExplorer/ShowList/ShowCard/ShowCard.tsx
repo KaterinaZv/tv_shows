@@ -4,9 +4,9 @@ import { Image } from '@/ui-kit/Image/Image';
 import { Link } from '@/ui-kit/Link/Link';
 import { Text } from '@/ui-kit/Text/Text';
 
+import { usePresenter } from './logic/usePresenter';
 import styles from './ShowCard.module.css';
 import type { Props } from './types';
-import { usePresenter } from './usePresenter';
 
 export const ShowCard = (props: Props) => {
   const { title, posterUrl, posterAlt, posterPlaceholder, rating, meta, genres, summary, tvmazeUrl, linkLabel } =

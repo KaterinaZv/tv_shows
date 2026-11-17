@@ -1,6 +1,6 @@
-import { HEADING_TAGS } from './constants';
-import styles from './Heading.module.css';
-import type { Props } from './types';
+import { HEADING_TAGS } from '../constants';
+import styles from '../Heading.module.css';
+import type { Props } from '../types';
 
 export const usePresenter = ({ children, level, className }: Props) => ({
   children,

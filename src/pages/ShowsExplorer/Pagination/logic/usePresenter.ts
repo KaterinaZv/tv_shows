@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import type { Props } from './types';
+import type { Props } from '../types';
 
 export const usePresenter = ({ page, totalPages, onPageChange }: Props) => {
   const { t } = useTranslation();

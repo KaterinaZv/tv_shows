@@ -2,18 +2,18 @@ import { PAGE_SIZE } from '@/shared/constants/pagination';
 import { usePagination } from '@/shared/hooks/usePagination';
 import { useSearchQuery } from '@/shared/hooks/useSearchQuery';
 
-import { EMPTY_RESULTS, SEARCH_DEBOUNCE_MS } from './constants';
-import styles from './ShowsExplorer.module.css';
+import { EMPTY_SHOWS, SEARCH_DEBOUNCE_MS } from '../constants';
+import styles from '../ShowsExplorer.module.css';
+import { getSearchStatus } from '../utils';
 import { useGenreFilter } from './useGenreFilter';
 import { useSearchShows } from './useSearchShows';
-import { getSearchStatus } from './utils';
 
 export const usePresenter = () => {
   const { query, searchQuery, isTyping, setQuery } = useSearchQuery(SEARCH_DEBOUNCE_MS);
   const { data, error, isPending, isFetching, isError, isPlaceholderData, fetchStatus, refetch } =
     useSearchShows(searchQuery);
 
-  const shows = (data ?? EMPTY_RESULTS).map((result) => result.show);
+  const shows = data ?? EMPTY_SHOWS;
   // Genres belong to a specific query: a new query starts with all genres
   const { genres, selectedGenres, filteredShows, toggleGenre, resetGenres } = useGenreFilter({
     shows,

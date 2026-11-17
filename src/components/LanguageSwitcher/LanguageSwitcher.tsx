@@ -1,7 +1,7 @@
 import { Chip } from '@/ui-kit/Chip/Chip';
 
 import styles from './LanguageSwitcher.module.css';
-import { usePresenter } from './usePresenter';
+import { usePresenter } from './logic/usePresenter';
 
 export const LanguageSwitcher = () => {
   const { groupLabel, options, handleSelect } = usePresenter();

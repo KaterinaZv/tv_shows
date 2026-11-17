@@ -3,7 +3,7 @@ import { Heading } from '@/ui-kit/Heading/Heading';
 import { Text } from '@/ui-kit/Text/Text';
 
 import styles from './Hero.module.css';
-import { usePresenter } from './usePresenter';
+import { usePresenter } from './logic/usePresenter';
 
 export const Hero = () => {
   const { badge, title, subtitle } = usePresenter();

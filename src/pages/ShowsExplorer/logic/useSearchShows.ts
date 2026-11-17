@@ -1,9 +1,8 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
-import { searchShows } from '@/api/searchShows';
-
-import { SEARCH_SHOWS_QUERY_KEY } from './constants';
-import { shouldRetrySearch } from './utils';
+import { SEARCH_SHOWS_QUERY_KEY } from '../constants';
+import { shouldRetrySearch } from '../utils';
+import { searchShows } from './tasks/searchShows';
 
 export const useSearchShows = (query: string) =>
   useQuery({

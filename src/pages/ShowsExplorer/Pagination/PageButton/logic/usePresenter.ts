@@ -1,5 +1,5 @@
-import styles from './PageButton.module.css';
-import type { Props } from './types';
+import styles from '../PageButton.module.css';
+import type { Props } from '../types';
 
 export const usePresenter = ({ number, ariaLabel, isCurrent, onSelect }: Props) => ({
   label: String(number),

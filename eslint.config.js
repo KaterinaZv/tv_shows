@@ -108,12 +108,13 @@ export default defineConfig([
         {
           patterns: [
             {
-              // Allowed: ./usePresenter, components (PascalCase), *.module.css. Types only via import type
-              regex: '^(?!\\./usePresenter$)(?!.*\\.module\\.css$)(?!(?:\\.{1,2}|@)/(?:.*/)?[A-Z][A-Za-z0-9]*$).*$',
+              // Allowed: ./logic/usePresenter, components (PascalCase), *.module.css. Types only via import type
+              regex:
+                '^(?!\\./logic/usePresenter$)(?!.*\\.module\\.css$)(?!(?:\\.{1,2}|@)/(?:.*/)?[A-Z][A-Za-z0-9]*$).*$',
               allowTypeImports: true,
               caseSensitive: true,
               message:
-                'View может импортировать только ./usePresenter, компоненты, ui-kit, *.module.css и типы (import type). Логика — в usePresenter.',
+                'View может импортировать только ./logic/usePresenter, компоненты, ui-kit, *.module.css и типы (import type). Логика — в usePresenter.',
             },
           ],
         },
@@ -122,7 +123,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/**/usePresenter.ts'],
+    files: ['src/**/logic/usePresenter.ts'],
     rules: {
       '@typescript-eslint/no-restricted-imports': [
         'error',
@@ -132,12 +133,69 @@ export default defineConfig([
               group: ['@tanstack/react-query'],
               allowTypeImports: true,
               message:
-                'Presenter не вызывает React Query напрямую: оберните запрос в отдельный хук use<Name>.ts (ARCHITECTURE.md, правило 2).',
+                'Presenter не вызывает React Query напрямую: оберните запрос в отдельный хук logic/use<Name>.ts (ARCHITECTURE.md, правило 2).',
             },
           ],
         },
       ],
       'no-restricted-syntax': ['error', ...moduleSyntax(PRESENTER_EXPORT_NAME)],
+    },
+  },
+  {
+    // Rule 3: all component hooks live in logic/; only universal hooks live in shared/hooks/
+    files: ['src/**/use*.ts'],
+    ignores: ['src/**/logic/**', 'src/shared/hooks/**'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'Program',
+          message:
+            'Хуки компонента лежат в папке logic/, универсальные — в src/shared/hooks/ (ARCHITECTURE.md, правила 3 и 4).',
+        },
+      ],
+    },
+  },
+  {
+    // Rule 8: tasks are plain functions independent of React, i18n, routing and UI
+    files: ['src/**/tasks/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                'react',
+                'react/*',
+                'react-dom',
+                'react-dom/*',
+                '@tanstack/*',
+                'i18next',
+                'react-i18next',
+                '@/i18n/*',
+                'react-router*',
+                '@/ui-kit/*',
+                '@/components/*',
+                '@/pages/*',
+                '*.module.css',
+              ],
+              message: 'Таски не зависят от React, React Query, i18n, роутера и UI (ARCHITECTURE.md, правило 8).',
+            },
+          ],
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'CallExpression[callee.name=/^use[A-Z]/]',
+          message: 'В тасках нет хуков: таска — обычная функция (ARCHITECTURE.md, правило 8).',
+        },
+        {
+          selector: 'JSXElement, JSXFragment',
+          message: 'В тасках нет JSX (ARCHITECTURE.md, правило 8).',
+        },
+      ],
     },
   },
   {

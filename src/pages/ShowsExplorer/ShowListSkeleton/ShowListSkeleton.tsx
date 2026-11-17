@@ -1,5 +1,5 @@
+import { usePresenter } from './logic/usePresenter';
 import styles from './ShowListSkeleton.module.css';
-import { usePresenter } from './usePresenter';
 
 export const ShowListSkeleton = () => {
   const { ariaLabel, cards } = usePresenter();

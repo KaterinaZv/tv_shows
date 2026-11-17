@@ -1,5 +1,5 @@
+import { usePresenter } from './logic/usePresenter';
 import type { Props } from './types';
-import { usePresenter } from './usePresenter';
 
 export const Image = (props: Props) => {
   const { src, alt, loading, className } = usePresenter(props);

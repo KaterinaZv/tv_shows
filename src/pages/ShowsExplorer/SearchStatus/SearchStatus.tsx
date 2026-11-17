@@ -2,9 +2,9 @@ import { Button } from '@/ui-kit/Button/Button';
 import { Heading } from '@/ui-kit/Heading/Heading';
 import { Text } from '@/ui-kit/Text/Text';
 
+import { usePresenter } from './logic/usePresenter';
 import styles from './SearchStatus.module.css';
 import type { Props } from './types';
-import { usePresenter } from './usePresenter';
 
 export const SearchStatus = (props: Props) => {
   const { icon, title, text, hasRetry, retryLabel, handleRetry } = usePresenter(props);

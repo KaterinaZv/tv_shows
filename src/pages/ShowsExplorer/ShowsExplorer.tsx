@@ -1,5 +1,6 @@
 import { GenreFilter } from './GenreFilter/GenreFilter';
 import { Hero } from './Hero/Hero';
+import { usePresenter } from './logic/usePresenter';
 import { Pagination } from './Pagination/Pagination';
 import { ResultsSummary } from './ResultsSummary/ResultsSummary';
 import { SearchBar } from './SearchBar/SearchBar';
@@ -7,7 +8,6 @@ import { SearchStatus } from './SearchStatus/SearchStatus';
 import { ShowList } from './ShowList/ShowList';
 import { ShowListSkeleton } from './ShowListSkeleton/ShowListSkeleton';
 import styles from './ShowsExplorer.module.css';
-import { usePresenter } from './usePresenter';
 
 export const ShowsExplorer = () => {
   const {
