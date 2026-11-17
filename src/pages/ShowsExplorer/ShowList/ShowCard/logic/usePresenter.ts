@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
-import type { Props } from './types';
-import { formatYears, stripHtml } from './utils';
+import type { Props } from '../types';
+import { formatYears, stripHtml } from '../utils';
 
 export const usePresenter = ({ show }: Props) => {
   const { t } = useTranslation();

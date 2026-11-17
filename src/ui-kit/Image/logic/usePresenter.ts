@@ -1,5 +1,5 @@
-import styles from './Image.module.css';
-import type { Props } from './types';
+import styles from '../Image.module.css';
+import type { Props } from '../types';
 
 export const usePresenter = ({ src, alt, isLazy = true, className }: Props) => ({
   src,

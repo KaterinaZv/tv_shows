@@ -1,5 +1,5 @@
+import { usePresenter } from './logic/usePresenter';
 import type { Props } from './types';
-import { usePresenter } from './usePresenter';
 
 export const Input = (props: Props) => {
   const { value, ariaLabel, placeholder, type, className, handleChange, handleKeyDown } = usePresenter(props);

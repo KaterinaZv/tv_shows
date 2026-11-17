@@ -1,5 +1,5 @@
+import { usePresenter } from './logic/usePresenter';
 import type { Props } from './types';
-import { usePresenter } from './usePresenter';
 
 export const Chip = (props: Props) => {
   const { label, isActive, className, handleClick } = usePresenter(props);

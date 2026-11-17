@@ -1,8 +1,8 @@
 import { Chip } from '@/ui-kit/Chip/Chip';
 
 import styles from './GenreFilter.module.css';
+import { usePresenter } from './logic/usePresenter';
 import type { Props } from './types';
-import { usePresenter } from './usePresenter';
 
 export const GenreFilter = (props: Props) => {
   const { hasGenres, groupLabel, chips, handleSelect } = usePresenter(props);

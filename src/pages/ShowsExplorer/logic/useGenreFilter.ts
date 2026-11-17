@@ -1,8 +1,10 @@
 import { useState } from 'react';
 
-import { NO_GENRES } from './constants';
-import type { GenreFilterParams, GenreState } from './types';
-import { collectGenres, hasAnyGenre, toggleGenre } from './utils';
+import { NO_GENRES } from '../constants';
+import type { GenreFilterParams, GenreState } from '../types';
+import { collectGenres } from './tasks/collectGenres';
+import { filterShowsByGenres } from './tasks/filterShowsByGenres';
+import { toggleGenre } from './tasks/toggleGenre';
 
 export const useGenreFilter = ({ shows, resetKey }: GenreFilterParams) => {
   const [state, setState] = useState<GenreState>({ resetKey, genres: NO_GENRES });
@@ -11,8 +13,7 @@ export const useGenreFilter = ({ shows, resetKey }: GenreFilterParams) => {
   return {
     genres: collectGenres(shows),
     selectedGenres,
-    // OR logic: a show matches if it has at least one of the selected genres
-    filteredShows: selectedGenres.length > 0 ? shows.filter((show) => hasAnyGenre(show, selectedGenres)) : shows,
+    filteredShows: filterShowsByGenres(shows, selectedGenres),
     toggleGenre: (genre: string) => setState({ resetKey, genres: toggleGenre(selectedGenres, genre) }),
     resetGenres: () => setState({ resetKey, genres: NO_GENRES }),
   };

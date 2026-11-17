@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 
-import { STATUS_ICONS } from './constants';
-import type { Props } from './types';
-import { getErrorText } from './utils';
+import { STATUS_ICONS } from '../constants';
+import type { Props } from '../types';
+import { getErrorText } from '../utils';
 
 export const usePresenter = ({ status, query, error, onRetry }: Props) => {
   const { t } = useTranslation();

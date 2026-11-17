@@ -1,5 +1,5 @@
+import { usePresenter } from './logic/usePresenter';
 import type { Props } from './types';
-import { usePresenter } from './usePresenter';
 
 export const Link = (props: Props) => {
   const { children, href, target, rel, className } = usePresenter(props);

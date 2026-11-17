@@ -1,7 +1,7 @@
 import { Button } from '@/ui-kit/Button/Button';
 
+import { usePresenter } from './logic/usePresenter';
 import type { Props } from './types';
-import { usePresenter } from './usePresenter';
 
 export const PageButton = (props: Props) => {
   const { label, ariaLabel, ariaCurrent, variant, className, handleClick } = usePresenter(props);

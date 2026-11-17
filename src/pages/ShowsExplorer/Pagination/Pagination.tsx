@@ -1,9 +1,9 @@
 import { Button } from '@/ui-kit/Button/Button';
 
+import { usePresenter } from './logic/usePresenter';
 import { PageButton } from './PageButton/PageButton';
 import styles from './Pagination.module.css';
 import type { Props } from './types';
-import { usePresenter } from './usePresenter';
 
 export const Pagination = (props: Props) => {
   const {

@@ -1,5 +1,5 @@
-import styles from './Chip.module.css';
-import type { Props } from './types';
+import styles from '../Chip.module.css';
+import type { Props } from '../types';
 
 export const usePresenter = ({ label, value, isActive, onSelect }: Props) => ({
   label,
