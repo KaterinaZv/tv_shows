@@ -28,6 +28,7 @@
 | Клиент | GitHub Pages | Push в `main` → GitHub Actions (`.github/workflows/deploy.yml`)                     |
 | Сервер | Render       | Push в `main` с изменениями в `server/`, `shared/` или зависимостях (`render.yaml`) |
 
+- Продакшен: клиент — https://katerinazv.github.io/tv_shows/, API — https://tv-shows-api-6w33.onrender.com (`/api/health` для проверки).
 - URL бэкенда для сборки клиента — переменная репозитория `VITE_API_URL` (Settings → Secrets and variables → Actions → Variables).
 - Бесплатный Render засыпает через 15 минут без запросов: первый запрос после этого ждёт до минуты, данные в памяти (кеш, избранное) стираются.
 
