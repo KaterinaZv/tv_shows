@@ -1,0 +1,27 @@
+# Render Blueprint for the backend (Settings → Blueprints → New Blueprint Instance)
+services:
+  - type: web
+    name: tv-shows-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    branch: main
+    buildCommand: npm ci && npm run build -w server
+    startCommand: npm run start -w server
+    healthCheckPath: /api/health
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - server/**
+        - shared/**
+        - package.json
+        - package-lock.json
+        - render.yaml
+    envVars:
+      - key: NODE_VERSION
+        value: '22'
+      # Skip installing git hooks on the build machine
+      - key: HUSKY
+        value: '0'
+      - key: CLIENT_ORIGIN
+        value: https://katerinazv.github.io

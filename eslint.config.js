@@ -9,7 +9,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 // View is any component: a *.tsx file with a PascalCase name (ARCHITECTURE.md, rule 1)
-const VIEW_FILES = ['src/**/[A-Z]*.tsx'];
+const VIEW_FILES = ['client/src/**/[A-Z]*.tsx'];
 
 const VIEW_SYNTAX = [
   {
@@ -51,7 +51,7 @@ const moduleSyntax = (allowedName) => [
 ];
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['**/dist']),
   {
     files: ['**/*.{ts,tsx,js}'],
     extends: [
@@ -75,6 +75,8 @@ export default defineConfig([
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
       '@typescript-eslint/consistent-type-imports': 'error',
+      // Unused arguments are allowed when prefixed with `_` (e.g. Express error handlers need all four)
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       // `any` is forbidden: explicit, as a cast, and leaking from untyped values
       '@typescript-eslint/no-explicit-any': ['error', { fixToUnknown: true }],
       '@typescript-eslint/no-unsafe-argument': 'error',
@@ -123,7 +125,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/**/logic/usePresenter.ts'],
+    files: ['client/src/**/logic/usePresenter.ts'],
     rules: {
       '@typescript-eslint/no-restricted-imports': [
         'error',
@@ -143,8 +145,8 @@ export default defineConfig([
   },
   {
     // Rule 3: all component hooks live in logic/; only universal hooks live in shared/hooks/
-    files: ['src/**/use*.ts'],
-    ignores: ['src/**/logic/**', 'src/shared/hooks/**'],
+    files: ['client/src/**/use*.ts'],
+    ignores: ['client/src/**/logic/**', 'client/src/shared/hooks/**'],
     rules: {
       'no-restricted-syntax': [
         'error',
@@ -158,7 +160,7 @@ export default defineConfig([
   },
   {
     // Rule 8: tasks are plain functions independent of React, i18n, routing and UI
-    files: ['src/**/tasks/**/*.{ts,tsx}'],
+    files: ['client/src/**/tasks/**/*.{ts,tsx}'],
     rules: {
       '@typescript-eslint/no-restricted-imports': [
         'error',
@@ -200,8 +202,8 @@ export default defineConfig([
   },
   {
     // Rule 5: base elements are rendered only through ui-kit
-    files: ['src/**/*.tsx'],
-    ignores: ['src/ui-kit/**'],
+    files: ['client/src/**/*.tsx'],
+    ignores: ['client/src/ui-kit/**'],
     rules: {
       'react/forbid-elements': [
         'error',
@@ -219,6 +221,30 @@ export default defineConfig([
             { element: 'span', message: 'Используйте Text или Badge из ui-kit.' },
             { element: 'a', message: 'Используйте Link из ui-kit.' },
             { element: 'img', message: 'Используйте Image из ui-kit.' },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['server/**/*.ts'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
+  {
+    // Rule 13: backend tasks know nothing about HTTP — they get plain arguments and return data
+    files: ['server/src/**/tasks/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['express', 'express/*', 'cors', '**/routes', '**/middleware/*'],
+              message:
+                'Таски бэкенда не знают про HTTP: без express, req/res и статусов (ARCHITECTURE.md, правило 13).',
+            },
           ],
         },
       ],
