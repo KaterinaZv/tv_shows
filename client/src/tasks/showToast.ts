@@ -1,6 +1,6 @@
 import { TOAST_DURATION_MS } from '@/shared/constants/toasts';
+import type { ToastVariant } from '@/shared/types/toasts';
 import { toastsStore } from '@/stores/toastsStore';
-import type { ToastVariant } from '@/stores/types';
 
 import { dismissToast } from './dismissToast';
 
