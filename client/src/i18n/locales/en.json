@@ -65,9 +65,26 @@
     "remove": "Remove “{{title}}” from favorites",
     "added": "“{{title}}” added to favorites",
     "removed": "“{{title}}” removed from favorites",
-    "error": "Failed to update favorites. Try again."
+    "error": "Failed to update favorites. Try again.",
+    "loginToAdd": "Log in to add “{{title}}” to favorites"
   },
   "toast": {
     "close": "Close notification"
+  },
+  "auth": {
+    "login": "Log in",
+    "logout": "Log out",
+    "title": "Log in",
+    "subtitle": "No password needed: enter your email to see your favorites.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "submit": "Log in",
+    "submitting": "Logging in…",
+    "back": "← Back to search",
+    "invalidEmail": "Enter a valid email.",
+    "error": "Failed to log in. Try again.",
+    "welcome": "Logged in as {{email}}",
+    "loggedOut": "You have logged out",
+    "loginRequired": "Log in to add shows to favorites"
   }
 }

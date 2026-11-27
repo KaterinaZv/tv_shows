@@ -17,14 +17,14 @@ const fetchShow = async (showId: number) => {
 };
 
 // Use case: the user stars a show. The server takes show data from TVmaze itself, the client sends only the id
-export const addToFavorites = async (clientId: string, showId: number): Promise<FavoriteChangeResponse> => {
-  const favorites = favoritesStore.get(clientId);
+export const addToFavorites = async (email: string, showId: number): Promise<FavoriteChangeResponse> => {
+  const favorites = favoritesStore.get(email);
 
   if (!(showId in favorites)) {
     const show = await fetchShow(showId);
 
-    favoritesStore.set(clientId, { ...favoritesStore.get(clientId), [showId]: { show, addedAt: Date.now() } });
+    favoritesStore.set(email, { ...favoritesStore.get(email), [showId]: { show, addedAt: Date.now() } });
   }
 
-  return { showId, isFavorite: true, count: Object.keys(favoritesStore.get(clientId)).length };
+  return { showId, isFavorite: true, count: Object.keys(favoritesStore.get(email)).length };
 };

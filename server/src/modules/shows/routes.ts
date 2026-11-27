@@ -18,5 +18,5 @@ showsRoutes.get('/', async (request, response) => {
     return;
   }
 
-  response.json(await getShowsPage({ ...params, clientId: response.locals.clientId }));
+  response.json(await getShowsPage({ ...params, userEmail: response.locals.userEmail }));
 });

@@ -12,5 +12,5 @@ export type FavoriteEntry = {
   addedAt: number;
 };
 
-// Favorites of one client, keyed by show id
-export type ClientFavorites = Record<number, FavoriteEntry>;
+// Favorites of one user, keyed by show id
+export type UserFavorites = Record<number, FavoriteEntry>;

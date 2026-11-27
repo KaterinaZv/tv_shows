@@ -1,0 +1,20 @@
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Mobile first: a long email is cut so the header stays on one line */
+.email {
+  overflow: hidden;
+  max-width: 120px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .email {
+    max-width: 280px;
+  }
+}

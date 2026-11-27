@@ -10,9 +10,11 @@ export const favoritesRoutes = Router();
 
 const INVALID_SHOW_ID: ApiErrorResponse = { message: 'showId must be a positive integer' };
 
+// The router is mounted behind requireAuth, so userEmail is always set here
+
 // GET /api/favorites
 favoritesRoutes.get('/', (_request, response) => {
-  response.json(getFavorites(response.locals.clientId));
+  response.json(getFavorites(response.locals.userEmail!));
 });
 
 // POST /api/favorites/:showId
@@ -25,7 +27,7 @@ favoritesRoutes.post('/:showId', async (request, response) => {
     return;
   }
 
-  response.json(await addToFavorites(response.locals.clientId, showId));
+  response.json(await addToFavorites(response.locals.userEmail!, showId));
 });
 
 // DELETE /api/favorites/:showId
@@ -38,5 +40,5 @@ favoritesRoutes.delete('/:showId', (request, response) => {
     return;
   }
 
-  response.json(removeFromFavorites(response.locals.clientId, showId));
+  response.json(removeFromFavorites(response.locals.userEmail!, showId));
 });

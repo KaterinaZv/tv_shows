@@ -5,3 +5,6 @@ export const isRateLimitError = (error: Error | null) => error instanceof ApiErr
 // Either our request timed out (AbortSignal.timeout → TimeoutError) or the backend gave up on TVmaze (504)
 export const isTimeoutError = (error: Error | null) =>
   error?.name === 'TimeoutError' || (error instanceof ApiError && error.status === 504);
+
+// The backend rejected the input (e.g. an invalid email)
+export const isBadRequestError = (error: Error | null) => error instanceof ApiError && error.status === 400;

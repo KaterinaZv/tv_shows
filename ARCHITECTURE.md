@@ -1,13 +1,13 @@
 # AI Rules — Simple Architecture
 
-> Версия 0.5. Документ пополняется по мере развития архитектуры.
+> Версия 0.6. Документ пополняется по мере развития архитектуры.
 > Правила обязательны для людей и для AI-ассистентов. Правила пишутся на русском, код и названия на английском.
 
 ## Стек
 
 **Монорепозиторий** на npm workspaces: `client/` (фронтенд), `server/` (бэкенд), `shared/` (контракт API).
 
-- **Frontend (`client/`):** React + TypeScript, Vite, React Query (`@tanstack/react-query`), собственный ui-kit на CSS-модулях (`*.module.css`), i18next + react-i18next. Хостинг — GitHub Pages.
+- **Frontend (`client/`):** React + TypeScript, Vite, React Query (`@tanstack/react-query`), React Router (`react-router`, `HashRouter`), собственный ui-kit на CSS-модулях (`*.module.css`), i18next + react-i18next. Хостинг — GitHub Pages.
 - **Backend (`server/`):** Node.js + TypeScript, Express. Хранение — в памяти процесса (баз данных пока нет). Хостинг — Render.
 - ESLint + Stylelint + Prettier, обязательны. Код с ошибками линтера не считается готовым.
 
@@ -43,11 +43,11 @@ package.json      ← npm workspaces, общие ESLint / Prettier / git-хук�
 
 ```
 src/
-  main.tsx        ← точка входа: провайдеры (React Query, i18n) и рендер <App />. Не компонент, правила View на него не распространяются
-  App/            ← корневой компонент: шапка приложения + страница (позже — роутер)
-  pages/          ← страницы. Каждая страница — компонент по правилам View + Presenter, внутри — дерево её компонентов
+  main.tsx        ← точка входа: провайдеры (React Query, i18n, HashRouter) и рендер <App />. Не компонент, правила View на него не распространяются
+  App/            ← корневой компонент: шапка приложения + страница по маршруту (`useRoutes`, таблица маршрутов в `constants.tsx`)
+  pages/          ← страницы (ShowsExplorer, Login). Каждая страница — компонент по правилам View + Presenter, внутри — дерево её компонентов
   components/     ← общие компоненты приложения (используются в 2+ местах или нужны на всех страницах)
-  tasks/          ← общие таски (нужны в 2+ местах) и таски уровня приложения (showToast, dismissToast)
+  tasks/          ← общие таски (нужны в 2+ местах) и таски уровня приложения (showToast, dismissToast, fetchCurrentUser)
   stores/         ← сущности (Entity): createStore + сторы — «база данных», только get / set (toastsStore)
   ui-kit/         ← базовые компоненты: Button, Input, SearchInput, Heading, Text, Badge, Link, Image, Chip, Spinner, Drawer, Toast
   shared/
@@ -55,7 +55,7 @@ src/
     constants/    ← общие константы, файлы по темам
     types/        ← общие типы, файлы по темам
     utils/        ← общие утилиты, файлы по темам
-  api/            ← DAL: только HTTP-обвязка над fetch (httpClient), clientId, ошибки, queryClient. Без эндпоинтов (правило 12)
+  api/            ← DAL: только HTTP-обвязка над fetch (httpClient), токен сессии (authToken), ошибки, queryClient. Без эндпоинтов (правило 12)
   i18n/           ← настройка i18next и переводы (locales/*.json)
   styles/         ← глобальные стили и CSS-переменные (токены)
 ```
@@ -395,6 +395,10 @@ const handleLogout = async () => {
 };
 ```
 
+- Роутер — `HashRouter` из `react-router`: адреса вида `#/login`, потому что GitHub Pages отдаёт только `index.html` и не умеет отвечать на `/login`. Провайдер подключается в `main.tsx`.
+- Таблица маршрутов — `App/constants.tsx`, пути страниц — `src/shared/constants/routes.ts` (`ROUTES.login`), чтобы presenter не писал адреса строками.
+- View не импортирует роутер: `useRoutes`, `useNavigate`, `useLocation` вызываются только в presenter (правило 1).
+
 ---
 
 ## Правило 11. Frontend и backend: кто за что отвечает
@@ -411,6 +415,7 @@ const handleLogout = async () => {
 | Ввод пользователя: debounce, выбранные фильтры и страница как **параметры запроса**     | **frontend** |
 | Уведомления (toast), навигация, анимации                                                | **frontend** |
 
+- **Валидация — на обеих сторонах, правило — одно.** Клиент проверяет ввод до запроса: кнопка неактивна, пока email не похож на настоящий, и заведомо неверные данные не уходят на сервер. Сервер проверяет всё равно — клиент можно обойти. Чтобы правила не разошлись, формат лежит в контракте (`EMAIL_PATTERN` в `shared/src/auth.ts`, правило 14), а не копируется.
 - Frontend **не дублирует** бизнес-логику бэкенда: не фильтрует и не пагинирует то, что уже отфильтровал и разбил на страницы сервер. Фронт передаёт параметры и показывает ответ.
 - **Осознанный компромисс:** при обновлении кеша по ответу мутации клиент повторяет минимум правил сервера (например, «новое избранное — сверху» в `updateFavoritesList`). Это дешевле, чем перезапрос списка; при расхождении источник правды — сервер.
 - Frontend **не обращается** к внешним API напрямую — только к своему бэкенду.
@@ -459,13 +464,16 @@ server/src/
       routes.ts         ← HTTP-слой: разбор запроса → вызов таски → HTTP-ответ
       tasks/            ← бизнес-логика модуля, одна таска — один файл
       types.ts, constants.ts, utils.ts
+    auth/
+      routes.ts         ← POST /api/auth/login, GET /api/auth/me, POST /api/auth/logout
+      tasks/            ← login, getCurrentUser, logout
     favorites/
-      routes.ts         ← GET / POST / DELETE /api/favorites
+      routes.ts         ← GET / POST / DELETE /api/favorites (только для вошедших)
       tasks/            ← getFavorites, addToFavorites, removeFromFavorites
-  tasks/                ← общие таски (используются в 2+ модулях): fetchTvmaze (кеш), mapTvmazeShow, markFavorites
-  stores/               ← сторы в памяти, только get / set (правило 9): tvmazeCacheStore, favoritesStore
+  tasks/                ← общие таски (используются в 2+ модулях или в middleware): fetchTvmaze (кеш), mapTvmazeShow, markFavorites, getSessionEmail
+  stores/               ← сторы в памяти, только get / set (правило 9): tvmazeCacheStore, sessionsStore, favoritesStore
   dal/                  ← createHttpClient (обвязка над fetch) + tvmaze (клиент с базовым URL TVmaze) (правило 12)
-  middleware/           ← общие middleware: cors, requireClientId, errorHandler (доменные ошибки → HTTP)
+  middleware/           ← общие middleware: cors, authenticate, requireAuth, errorHandler (доменные ошибки → HTTP)
   shared/               ← общие constants / env / errors / types / utils
 ```
 
@@ -483,12 +491,17 @@ server/src/
 
 ---
 
-## Правило 14. Контракт API и идентификация клиента
+## Правило 14. Контракт API и авторизация
 
 - **Типы запросов и ответов API** (DTO) описываются **один раз** в `shared/` и импортируются и клиентом, и сервером. Расхождение контракта — ошибка типов, а не баг в рантайме.
 - В `shared/` — **только типы** (и при необходимости константы контракта). Логики там нет.
 - Ответы API — в формате, удобном фронту, но без UI-деталей: сервер не форматирует даты под язык и не отдаёт тексты интерфейса.
-- **Идентификация клиента:** у каждого браузера своё избранное. Фронтенд при первом запуске генерирует `clientId` (`crypto.randomUUID()`), хранит его в `localStorage` и отправляет в каждом запросе в заголовке `X-Client-Id`. Это делает DAL (`httpClient`), а не таски. Бэкенд хранит данные по ключу клиента: `favorite[clientId]`.
+- **Авторизация — на бэкенде.** Вход по email без пароля: `POST /api/auth/login` проверяет email, открывает сессию (`sessions[token] = email`) и возвращает токен. Бэкенд — источник истины о том, кто вошёл; фронтенд только хранит токен и показывает результат.
+- **Токен отправляет DAL.** Таска `login` сохраняет токен (`api/authToken.ts`, `localStorage`), `logout` — удаляет. `httpClient` добавляет заголовок `Authorization: Bearer <token>` в каждый запрос, таски про заголовки не знают.
+- **Middleware `authenticate`** на каждом запросе находит пользователя по токену (таска `getSessionEmail`) и кладёт его в `response.locals.userEmail` (`null` для гостя). Роуты передают email в таски обычным аргументом. **`requireAuth`** закрывает персональные роуты (`/api/favorites`) ответом `401`.
+- **Персональные данные хранятся по email, а не по сессии:** `favorite[email]`. Выход закрывает только сессию, поэтому после повторного входа под тем же email избранное на месте.
+- **Текущий пользователь на клиенте — серверные данные**, поэтому он в кеше React Query (`useCurrentUser`, `src/shared/hooks/`), а не в сторе (правило 9: не храним то, что можно не хранить). Вход и выход записывают нового пользователя в кеш по ответу сервера, а персональные запросы (избранное, звёздочки в выдаче) сбрасывают и запрашивают заново.
+- **Гость** ищет и смотрит сериалы: сервер отдаёт `isFavorite: false`, кнопки избранного в шапке нет, звёздочка отправляет на страницу входа. Запрет на сервере (`401`) — последний рубеж, интерфейс его только повторяет.
 
 ---
 
