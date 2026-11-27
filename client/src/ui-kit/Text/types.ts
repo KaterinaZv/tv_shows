@@ -7,4 +7,6 @@ export type Props = {
   as?: 'p' | 'span';
   variant?: TextVariant;
   className?: string;
+  // 'alert' makes screen readers announce the text as soon as it appears (e.g. a form error)
+  role?: 'alert';
 };

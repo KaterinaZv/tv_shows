@@ -1,7 +1,7 @@
 import { MAX_GENRES, MAX_QUERY_LENGTH } from './constants';
 import type { ShowsPageParams } from './types';
 
-type ParsedShowsPageQuery = Omit<ShowsPageParams, 'clientId'>;
+type ParsedShowsPageQuery = Omit<ShowsPageParams, 'userEmail'>;
 
 // Validates ?q=&genres=&page= and returns null when the request is malformed
 export const parseShowsPageQuery = ({ q, genres, page }: Record<string, unknown>): ParsedShowsPageQuery | null => {

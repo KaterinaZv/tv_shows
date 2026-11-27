@@ -11,11 +11,13 @@ export const usePresenter = ({
   placeholder,
   type = 'text',
   variant = 'default',
+  autoComplete = 'off',
 }: Props) => ({
   value,
   ariaLabel,
   placeholder,
   type,
+  autoComplete,
   className: `${styles.input} ${styles[variant]}`,
   handleChange: (event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value),
   handleKeyDown: (event: KeyboardEvent<HTMLInputElement>) => onKeyDown?.(event.key),

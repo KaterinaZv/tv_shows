@@ -1,11 +1,11 @@
-import type { ClientFavorites } from './types';
+import type { UserFavorites } from './types';
 
-// In-memory "table" of favorites: every browser (clientId) has its own collection. Lives as long as the process
-const favorite: Record<string, ClientFavorites> = {};
+// In-memory "table" of favorites: every user (email) has its own collection. Lives as long as the process
+const favorite: Record<string, UserFavorites> = {};
 
 export const favoritesStore = {
-  get: (clientId: string): ClientFavorites => favorite[clientId] ?? {},
-  set: (clientId: string, favorites: ClientFavorites) => {
-    favorite[clientId] = favorites;
+  get: (email: string): UserFavorites => favorite[email] ?? {},
+  set: (email: string, favorites: UserFavorites) => {
+    favorite[email] = favorites;
   },
 };

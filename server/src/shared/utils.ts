@@ -20,3 +20,10 @@ export const parsePositiveInt = (value: unknown) => {
 
   return Number.isInteger(number) && number > 0 ? number : null;
 };
+
+// Token from the "Authorization: Bearer <token>" header, otherwise null
+export const parseBearerToken = (header: string | undefined) => {
+  const [scheme, token] = header?.split(' ') ?? [];
+
+  return scheme === 'Bearer' && token ? token : null;
+};

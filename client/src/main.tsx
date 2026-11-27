@@ -4,6 +4,7 @@ import './i18n/i18n';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { HashRouter } from 'react-router';
 
 import { queryClient } from './api/queryClient';
 import { App } from './App/App';
@@ -17,7 +18,10 @@ if (!rootElement) {
 createRoot(rootElement).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <App />
+      {/* Hash URLs (#/login): GitHub Pages serves only index.html and cannot answer /login itself */}
+      <HashRouter>
+        <App />
+      </HashRouter>
     </QueryClientProvider>
   </StrictMode>,
 );

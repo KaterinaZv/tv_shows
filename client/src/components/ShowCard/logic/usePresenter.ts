@@ -1,5 +1,8 @@
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 
+import { ROUTES } from '@/shared/constants/routes';
+import { useCurrentUser } from '@/shared/hooks/useCurrentUser';
 import { showToast } from '@/tasks/showToast';
 
 import styles from '../ShowCard.module.css';
@@ -9,6 +12,8 @@ import { useToggleFavorite } from './useToggleFavorite';
 
 export const usePresenter = ({ show }: Props) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useCurrentUser();
   const { mutate, isPending } = useToggleFavorite();
   // Optimistic: while the request is in flight the star already shows the new state
   const isFavorite = isPending ? !show.isFavorite : show.isFavorite;
@@ -29,10 +34,20 @@ export const usePresenter = ({ show }: Props) => {
     linkLabel: t('show.openOnTvmaze'),
     isFavorite,
     favoriteIcon: isFavorite ? '★' : '☆',
-    favoriteLabel: t(isFavorite ? 'favorites.remove' : 'favorites.add', { title: show.name }),
+    favoriteLabel: t(isAuthenticated ? (isFavorite ? 'favorites.remove' : 'favorites.add') : 'favorites.loginToAdd', {
+      title: show.name,
+    }),
     favoriteClassName: isFavorite ? `${styles.favorite} ${styles.favoriteActive}` : styles.favorite,
     isFavoritePending: isPending,
-    handleFavoriteClick: () =>
+    handleFavoriteClick: () => {
+      // Favorites are personal: a guest is sent to the login page instead
+      if (!isAuthenticated) {
+        showToast(t('auth.loginRequired'));
+        void navigate(ROUTES.login);
+
+        return;
+      }
+
       mutate(
         { show },
         {
@@ -40,6 +55,7 @@ export const usePresenter = ({ show }: Props) => {
             showToast(t(result.isFavorite ? 'favorites.added' : 'favorites.removed', { title: show.name })),
           onError: () => showToast(t('favorites.error'), 'error'),
         },
-      ),
+      );
+    },
   };
 };

@@ -5,6 +5,7 @@ import { EMPTY_SHOWS, NO_GENRES, SEARCH_DEBOUNCE_MS } from '../constants';
 import styles from '../ShowsExplorer.module.css';
 import { getSearchStatus } from '../utils';
 import { useGenreFilter } from './useGenreFilter';
+import { useResetOnLogout } from './useResetOnLogout';
 import { useShowsPage } from './useShowsPage';
 
 export const usePresenter = () => {
@@ -12,6 +13,9 @@ export const usePresenter = () => {
   // Genres belong to a specific query, the page — to a specific query and genre selection
   const { selectedGenres, toggleGenre, resetGenres } = useGenreFilter(searchQuery);
   const { page, setPage } = usePagination(JSON.stringify([searchQuery, selectedGenres]));
+
+  // Clearing the query is enough: genres and the page are reset by it
+  useResetOnLogout(() => setQuery(''));
   const { data, error, isPending, isFetching, isError, isPlaceholderData, fetchStatus, refetch } = useShowsPage({
     query: searchQuery,
     genres: selectedGenres,

@@ -6,6 +6,8 @@ export type Props = {
   onChange: (value: string) => void;
   onKeyDown?: (key: string) => void;
   placeholder?: string;
-  type?: 'text' | 'search';
+  type?: 'text' | 'search' | 'email';
+  // Browser autofill hint, e.g. 'email'; off by default
+  autoComplete?: string;
   variant?: InputVariant;
 };

@@ -1,6 +1,6 @@
 import { ApiError } from './ApiError';
-import { getClientId } from './clientId';
-import { API_BASE_URL, CLIENT_ID_HEADER, REQUEST_TIMEOUT_MS } from './constants';
+import { getAuthToken } from './authToken';
+import { API_BASE_URL, REQUEST_TIMEOUT_MS } from './constants';
 import type { HttpMethod, RequestOptions } from './types';
 
 const buildUrl = (path: string, params: RequestOptions['params'] = {}) => {
@@ -13,18 +13,37 @@ const buildUrl = (path: string, params: RequestOptions['params'] = {}) => {
   return url;
 };
 
-const request = async <T>(method: HttpMethod, path: string, { params, signal }: RequestOptions = {}): Promise<T> => {
+// A logged-in user is identified by the session token; a guest sends no Authorization header
+const buildHeaders = (hasBody: boolean) => {
+  const headers: Record<string, string> = {};
+  const token = getAuthToken();
+
+  if (token) headers.Authorization = `Bearer ${token}`;
+  if (hasBody) headers['Content-Type'] = 'application/json';
+
+  return headers;
+};
+
+const request = async <T>(
+  method: HttpMethod,
+  path: string,
+  { params, signal, body }: RequestOptions = {},
+): Promise<T> => {
   // The request is aborted either by React Query (a newer query) or by the timeout on a hanging network
   const timeoutSignal = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
   const response = await fetch(buildUrl(path, params), {
     method,
-    headers: { [CLIENT_ID_HEADER]: getClientId() },
+    headers: buildHeaders(body !== undefined),
+    body: body === undefined ? undefined : JSON.stringify(body),
     signal: signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal,
   });
 
   if (!response.ok) {
     throw new ApiError(response.status);
   }
+
+  // 204 No Content (e.g. logout) has no body to parse
+  if (response.status === 204) return undefined as T;
 
   return (await response.json()) as T;
 };

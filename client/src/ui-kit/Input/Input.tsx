@@ -2,7 +2,8 @@ import { usePresenter } from './logic/usePresenter';
 import type { Props } from './types';
 
 export const Input = (props: Props) => {
-  const { value, ariaLabel, placeholder, type, className, handleChange, handleKeyDown } = usePresenter(props);
+  const { value, ariaLabel, placeholder, type, autoComplete, className, handleChange, handleKeyDown } =
+    usePresenter(props);
 
   return (
     <input
@@ -11,7 +12,7 @@ export const Input = (props: Props) => {
       value={value}
       placeholder={placeholder}
       aria-label={ariaLabel}
-      autoComplete="off"
+      autoComplete={autoComplete}
       spellCheck={false}
       onChange={handleChange}
       onKeyDown={handleKeyDown}
